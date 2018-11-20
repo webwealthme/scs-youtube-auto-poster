@@ -122,8 +122,8 @@ return $defaultcat;
 
 function tytttap() {
 
-    include dirname(__FILE__)."/getytcaptions.php";
-    include dirname(__FILE__)."/tempinfo.php.php";
+    include dirname(__FILE__)."/incl/getytcaptions.php";
+    include dirname(__FILE__)."/tempinfo.php";
 
     echo "<h1>POSTS CREATED! ...</h1>";
     //$chosen = "only me now";
