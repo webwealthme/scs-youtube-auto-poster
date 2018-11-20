@@ -67,6 +67,7 @@ function getBaseClosedCaptionsUrl($videoId) {
 		die('Failed to load youtube url '.$pageUrl);
 	}
 	
+	//this gives an error, so i temporarely disabled it
 	$matches = [];
 	if (!preg_match('/TTS_URL\': "(.+?)"/is', $responseText, $matches)) {
 		die('Failed to find TTS_URL in page source for '.$pageUrl);

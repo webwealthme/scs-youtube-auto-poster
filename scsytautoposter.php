@@ -161,14 +161,13 @@ function tytttap() {
     );  
 
     //this gets the latest 20 videos from youtube
-    $ytvidres=20;
-    $yturl="https://www.googleapis.com/youtube/v3/search?key=".$scs_apikey."&channelId=".$scs_channelId."&part=snippet,id&order=date&maxResults=".$ytvidres;
+    $yturl="https://www.googleapis.com/youtube/v3/search?key=".$scs_apikey."&channelId=".$scs_channelId."&part=snippet,id&order=date&maxResults=".$scs_noofvids;
     $json = file_get_contents($yturl, false, stream_context_create($arrContextOptions));
     $data = json_decode($json,true);
     //echo $data;
 
 
-    for($j=0;$j<$ytvidres;$j++){
+    for($j=0;$j<$scs_noofvids;$j++){
     echo "<br><h2>Video $j:</h2>";
     $currvidid = $data['items'][$j]['id']['videoId'];
     //echo "ID: ".$currvidid."<br>";
@@ -204,7 +203,7 @@ function tytttap() {
     $my_post = array(
         'post_title' => $data['items'][$j]['snippet']['title'],
         'post_date' => the_date(),        
-        'post_status' => 'publish',
+        'post_status' => $scs_post_status,
         'post_type' => 'post',
         'post_content' => $currviddes."<br> <h3>Auto Generated Captions</h3>".$autogencaptions,
         'post_category' => $this->autoselectcategory($data['items'][$j]['snippet']['title']),
