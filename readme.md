@@ -10,10 +10,10 @@ Auto Posts newest YouTube Videos from the YouTube channel(s) of your choice.
 # FAQ
 
 
-#TODO
+# TODO
 
 
-#WISHLIST
+# WISHLIST
 
 
 ## Feel free to contact me for any request/feedback :)
