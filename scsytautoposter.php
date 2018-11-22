@@ -80,50 +80,11 @@ class MySettingsPage
 		//echo "myyy settings";
     }
 
-
-
-    //+++++++ADD ALL CODE HERE+++++++++++
-
-//DONE activate on specific page
-//wishlist status update
-//DONE add thumbnail
-//DONE add captions
-//todo make published
-//todo chron job
-
-//we create a function to automatically choose category based on title
-function autoselectcategory($titleinfunc){
-
-    $thiscat = 0;
-    $titleinfunc = strtolower($titleinfunc);
-    if (strpos($titleinfunc, 'bryan') !== false) {
-        $thiscat = 157;
-    }elseif(strpos($titleinfunc, 'talk') !== false){
-        $thiscat = 24;
-    }elseif(strpos($titleinfunc, 'update') !== false){
-        $thiscat = 25;
-    }elseif((strpos($titleinfunc, 'ad') !== false)||(strpos($titleinfunc, 'ads') !== false)){
-        $thiscat = 19;
-    }elseif(strpos($titleinfunc, 'tutorial') !== false){
-        $thiscat = 11;
-    }else{
-        $thiscat = 0;
-    }
-
-    if($thiscat != 0){
-        $defaultcat = array(2, 6, $thiscat);
-    }else{$defaultcat = array(2, 6);}
-
-return $defaultcat;
-
-
-//echo "result".
-}
-
 function tytttap() {
 
     include dirname(__FILE__)."/incl/getytcaptions.php";
     include dirname(__FILE__)."/tempinfo.php";
+    include dirname(__FILE__)."/functions.php";
 
     echo "<h1>POSTS CREATED! ...</h1>";
     //$chosen = "only me now";
