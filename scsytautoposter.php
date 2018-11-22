@@ -38,10 +38,10 @@ class MySettingsPage
     {
         // This page will be under "Settings"
         add_options_page(
-            'Settings Admin', 
+            'SCS Auto Poster Options', 
             'SCS Auto Poster', 
             'manage_options', 
-            'my-setting-admin', 
+            'scs_ytap', 
            // array( $this, 'create_admin_page' )
            array( $this, 'tytttap' )
         );
@@ -140,7 +140,7 @@ function tytttap() {
     //echo "<br>";
     //we get only the yt links
     $regex = '/https?\:\/\/[^\",]+/i';
-    preg_match_all($regex, $postmeta['td_post_video'][0], $matches);
+    preg_match_all($regex, $postmeta['scs_ytap_video_id'][0], $matches);
     //echo $matches[0][0]; 
     // we get only the ids
     $url = $matches[0][0];
@@ -153,6 +153,7 @@ function tytttap() {
     //var_dump($allwpytids);
     //echo "</pre>";
     
+    //this fixes the file_get_contents
     $arrContextOptions=array(
         "ssl"=>array(
             "verify_peer"=>false,
@@ -205,9 +206,10 @@ function tytttap() {
         'post_date' => the_date(),        
         'post_status' => $scs_post_status,
         'post_type' => 'post',
-        'post_content' => $currviddes."<br> <h3>Auto Generated Captions</h3>".$autogencaptions,
+        'post_content' => "[embed]https://www.youtube.com/watch?v=".$currvidid."[/embed]".$currviddes."<br> <h3>Auto Generated Captions</h3>".$autogencaptions,
         'post_category' => $this->autoselectcategory($data['items'][$j]['snippet']['title']),
-        'tags_input' => $currvidtags,
+        'tags_input' => $currvidtags,        
+        'meta_input' => array($currvidid),
     
     );
     $the_post_id = wp_insert_post( $my_post );
@@ -237,6 +239,25 @@ $attach_id = wp_insert_attachment( $attachment, $uploadfile );
 set_post_thumbnail( $the_post_id, $attach_id );
 
 
+    //here we add the video id to post metadata to not repost it again
+    $tag = 'post-format-video';
+    $taxonomy = 'post_format';
+    wp_set_post_terms( $the_post_id, $tag, $taxonomy );
+    //add the video url to database
+    $meta_key = 'scs_ytap_video_id';   
+    
+
+    
+    $meta_value = array(
+        'td_video' => 'https://www.youtube.com/watch?v='.$currvidid,
+        'td_last_video' => 'https://www.youtube.com/watch?v='.$currvidid,
+
+    );
+    
+    add_post_meta( $the_post_id, $meta_key, $meta_value); 
+
+
+
 /*
 $imagenew = get_post( $attach_id );
 $fullsizepath = get_attached_file( $imagenew->ID );
@@ -246,20 +267,24 @@ wp_update_attachment_metadata( $attach_id, $attach_data );
 
 
 
-    
+    //todo ability to add post type of standard or video
     $tag = 'post-format-video';
     $taxonomy = 'post_format';
     wp_set_post_terms( $the_post_id, $tag, $taxonomy );
     //add the video url to database
-    $meta_key = 'td_post_video';    
-    $meta_value = array(
-        'td_video' => 'https://www.youtube.com/watch?v='.$currvidid,
-        'td_last_video' => 'https://www.youtube.com/watch?v='.$currvidid,
+    $meta_key = 'scs_ytap_video_id';   
+    
 
+    
+    $meta_value = array(
+        //'td_video' => 'https://www.youtube.com/watch?v='.$currvidid,       
+        $currvidid
     );
     
     add_post_meta( $the_post_id, $meta_key, $meta_value); 
 
+/*
+// old specific theme code insert
     $currviddesno = count($currviddes);
     $currvidtitleno = count($currvidtitle);
     $meta_key2 = 'td_post_theme_settings';
@@ -272,7 +297,7 @@ wp_update_attachment_metadata( $attach_id, $attach_data );
     );
     
     add_post_meta( $the_post_id, $meta_key2, $meta_value2); 
-
+*/
 
     }
     
