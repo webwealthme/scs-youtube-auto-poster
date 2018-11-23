@@ -17,4 +17,4 @@ Auto Posts newest YouTube Videos from the YouTube channel(s) of your choice.
 - get video comments
 
 ## Feel free to contact me for any request/feedback :)
-## Note: Requires at least PHP 5.4
+## Note: Requires at least PHP 5.6
