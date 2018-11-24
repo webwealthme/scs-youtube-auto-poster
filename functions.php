@@ -1,7 +1,7 @@
 <?php
 //include necessary files
 include dirname(__FILE__) . "/incl/getytcaptions.php";
-include dirname(__FILE__) . "/tempinfo.php";
+//include dirname(__FILE__) . "/tempinfo.php";
 
 //define constants
 //this fixes the file_get_contents
@@ -127,4 +127,37 @@ function scs_ytap_createPost($currvidtitle,$scs_post_status,$currvidid,$currvidd
                 add_post_meta($the_post_id, $meta_key, $meta_value);
 
                 return $the_post_id;
+            }
+
+function post_status_array_loop($current){
+    $post_status_array = array("draft", "publish", "pending", "private", "trash", "inherit");
+    $result =  "";
+    $selected="";
+foreach ($post_status_array as $post_status){
+    if ($current == $post_status){$selected = "selected='selected'";}else{$selected="";}
+    $result .= "<option value='$post_status' $selected>$post_status</option>";
+}
+    return $result;
+}
+
+
+            function scs_ytap_outputcss(){
+              $css= "
+<style>
+.scs_ytap_ytbutton{
+    background-color: #FF0000;
+    border-radius: 2px;
+    color: white;
+    padding: 10px 16px;
+    margin: 4px;
+    white-space: nowrap;
+    font-size: 1.4rem;
+    font-weight: 500;
+    letter-spacing: .007px;
+    text-transform: uppercase;}
+
+</style>";
+echo $css;
+
+               
             }
