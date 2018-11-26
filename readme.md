@@ -11,7 +11,7 @@ Auto Posts newest YouTube Videos from the YouTube channel(s) of your choice.
 
 
 # TODO
-- make tags
+
 
 # WISHLIST
 - get video comments

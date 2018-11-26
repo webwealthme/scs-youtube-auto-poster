@@ -72,10 +72,13 @@ class MySettingsPage
       
         
         <?php
+scs_ytap_outputcss();
+        scs_ytap_outputjs();
+
 if (isset($_POST['action'])) {
            // echo $_POST['action'];
         $this->tytttap();}
-        scs_ytap_outputcss();
+                
     }
 
     /**
@@ -130,6 +133,27 @@ if (isset($_POST['action'])) {
             'scs_ytap',
             'setting_section_scs_ytap'
         );
+        add_settings_field(
+            'scs_ytap_shortcodes',
+            'Shortcodes',
+            array($this, 'scs_ytap_shortcodes_callback'),
+            'scs_ytap',
+            'setting_section_scs_ytap'
+        );
+        add_settings_field(
+            'scs_ytap_publishedAfter',
+            'Published After',
+            array($this, 'publishedAfter_callback'),
+            'scs_ytap',
+            'setting_section_scs_ytap'
+        );
+        add_settings_field(
+            'scs_ytap_publishedBefore',
+            'Published Before',
+            array($this, 'publishedBefore_callback'),
+            'scs_ytap',
+            'setting_section_scs_ytap'
+        );
     }
 
     /**
@@ -155,6 +179,15 @@ if (isset($_POST['action'])) {
 
         if (isset($input['post_status'])) {
             $new_input['post_status'] = sanitize_text_field($input['post_status']);
+        }
+        if (isset($input['scs_ytap_shortcodes'])) {
+            $new_input['scs_ytap_shortcodes'] = sanitize_text_field($input['scs_ytap_shortcodes']);
+        }
+        if (isset($input['publishedAfter'])) {
+            $new_input['publishedAfter'] = sanitize_text_field($input['publishedAfter']);
+        }
+        if (isset($input['publishedBefore'])) {
+            $new_input['publishedBefore'] = sanitize_text_field($input['publishedBefore']);
         }
 
         return $new_input;
@@ -202,7 +235,7 @@ if (isset($_POST['action'])) {
             $scs_noofvids=$this->options['noofvids'];}else{$scs_noofvids="";}
         
         printf(
-            '<input type="text" id="noofvids" name="scs_ytap_options[noofvids]" value="%s" /> (Maximum 20 videos at once at the moment)',
+            '<input type="text" id="noofvids" name="scs_ytap_options[noofvids]" value="%s" /> (Maximum 50 videos at once at the moment)',
             isset($this->options['noofvids']) ? esc_attr($this->options['noofvids']) : ''
         );
     }
@@ -225,6 +258,49 @@ $post_status_code = post_status_array_loop($scs_post_status);
 
     }
 
+    public function scs_ytap_shortcodes_callback()
+    {
+        global $scs_ytap_shortcodes;
+        //here we replace the shortcode values with the actual variables
+        if (isset($this->options['scs_ytap_shortcodes'])){
+        $scs_ytap_shortcodes=$this->options['scs_ytap_shortcodes'];}else{$scs_ytap_shortcodes="";}
+
+
+       printf(
+            '(Use these shortcodes: [scs_ytap_video-title] [scs_ytap_video-id] [scs_ytap_video-embed] [scs_ytap_video-description] [scs_ytap_video-captions] [scs_ytap_video-tags] [scs_ytap_video-thumbnail] )<br> <textarea rows="4" cols="50" id="scs_ytap_shortcodes" name="scs_ytap_options[scs_ytap_shortcodes]" value="" >%s</textarea> <br>(Default: [scs_ytap_video-embed] [scs_ytap_video-description] &lt;br&gt; &lt;h3&gt;Auto Generated Captions&lt;/h3&gt; [scs_ytap_video-captions])',
+            isset($this->options['scs_ytap_shortcodes']) ? esc_attr($this->options['scs_ytap_shortcodes']) : "[scs_ytap_video-embed] [scs_ytap_video-description] &lt;br&gt; &lt;h3&gt;Auto Generated Captions&lt;/h3&gt; [scs_ytap_video-captions]"
+        );
+//$currvidtitle [scs_ytap_video-title]
+//$currvidid [scs_ytap_video-id]
+//$currviddes [scs_ytap_video-description]
+//$autogencaptions [scs_ytap_video-captions]
+//$currvidtags [scs_ytap_video-tags]
+//$curthumb [scs_ytap_video-thumbnail]
+
+    }
+
+    public function publishedAfter_callback()
+    { global $scs_publishedAfter;
+        if (isset($this->options['publishedAfter'])){
+            $scs_publishedAfter=$this->options['publishedAfter'];}else{$scs_publishedAfter="";}
+
+        printf(
+            '<input type="date" id="publishedAfter" class="scsytapdate" name="scs_ytap_options[publishedAfter]" value="%s" /> (Optional: Get videos published after a certain date)',
+            isset($this->options['publishedAfter']) ? esc_attr($this->options['publishedAfter']) : ''
+        );
+    }
+
+    public function publishedBefore_callback()
+    { global $scs_publishedBefore;
+        if (isset($this->options['publishedBefore'])){
+            $scs_publishedBefore=$this->options['publishedBefore'];}else{$scs_publishedBefore="";}
+        
+        printf(
+            '<input type="date" id="publishedBefore" class="scsytapdate" name="scs_ytap_options[publishedBefore]" value="%s" /> (Optional: Get videos published before a certain date)',
+            isset($this->options['publishedBefore']) ? esc_attr($this->options['publishedBefore']) : ''
+        );
+    }
+
     public function tytttap()
     {
 
@@ -232,13 +308,16 @@ $post_status_code = post_status_array_loop($scs_post_status);
         global $scs_channelId;
 global $scs_noofvids;
 global $scs_post_status;
+global $scs_ytap_shortcodes;
+global $scs_publishedAfter;
+global $scs_publishedBefore;
 
 
         echo "<h1>POSTS CREATED! ...</h1>";
 
         $allwpytids = scs_ytap_getYtIdsFromPosts();
 
-        $data = scs_ytap_getYtVideoListData($scs_apikey, $scs_channelId, $scs_noofvids);
+        $data = scs_ytap_getYtVideoListData($scs_apikey, $scs_channelId, $scs_noofvids,$scs_publishedAfter,$scs_publishedBefore);
         //echo $data;
 
         for ($j = 0; $j < $scs_noofvids; $j++) {
@@ -269,7 +348,7 @@ global $scs_post_status;
                 //$autogencaptions = getClosedCaptionsForVideo($currvidid);
                 $autogencaptions = "";
 
-                scs_ytap_createPost($currvidtitle, $scs_post_status, $currvidid, $currviddes, $autogencaptions, $currvidtags, $curthumb);
+                scs_ytap_createPost($currvidtitle, $scs_post_status, $currvidid, $currviddes, $autogencaptions, $currvidtags, $curthumb,$scs_ytap_shortcodes);
 
             } else {echo "Video <b>'" . $currvidtitle . "'</b> already posted! <br>";}
 
