@@ -75,15 +75,17 @@ function scs_ytap_addPostFeatImgFromYt($currvidid, $curthumb, $the_post_id)
 }
 
 //this gets the latest 20 videos from youtube
-function scs_ytap_getYtVideoListData($scs_apikey, $scs_channelId, $scs_noofvids,$scs_publishedAfter,$scs_publishedBefore)
+function scs_ytap_getYtVideoListData($scs_apikey, $scs_channelId, $scs_noofvids, $scs_publishedAfter, $scs_publishedBefore)
 {
     //var_dump($scs_publishedAfter);
     //var_dump($scs_publishedBefore);
     $orderbydate = "&order=date";
-    if($scs_publishedAfter !=""){$scs_publishedAfter = "&publishedAfter=".$scs_publishedAfter."T00%3A00%3A00.0Z";$orderbydate="";}
-    if($scs_publishedBefore != ""){$scs_publishedBefore = "&publishedBefore=".$scs_publishedBefore."T00%3A00%3A00.0Z";$orderbydate="";}
+    if ($scs_publishedAfter != "") {$scs_publishedAfter = "&publishedAfter=" . $scs_publishedAfter . "T00%3A00%3A00.0Z";
+        $orderbydate = "";}
+    if ($scs_publishedBefore != "") {$scs_publishedBefore = "&publishedBefore=" . $scs_publishedBefore . "T00%3A00%3A00.0Z";
+        $orderbydate = "";}
 
-    $yturl = "https://www.googleapis.com/youtube/v3/search?key=" . $scs_apikey . "&channelId=" . $scs_channelId . "&part=snippet,id".$orderbydate."&maxResults=" . $scs_noofvids.$scs_publishedAfter.$scs_publishedBefore;
+    $yturl = "https://www.googleapis.com/youtube/v3/search?key=" . $scs_apikey . "&channelId=" . $scs_channelId . "&part=snippet,id" . $orderbydate . "&maxResults=" . $scs_noofvids . $scs_publishedAfter . $scs_publishedBefore;
     echo $yturl;
     $json = file_get_contents($yturl, false, stream_context_create(unserialize(FIXFILEGET)));
     $data = json_decode($json, true);
@@ -100,7 +102,7 @@ function scs_ytap_getYtVideoIndividualData($scs_apikey, $currvidid)
 
 }
 
-function scs_ytap_createPost($currvidtitle, $scs_post_status, $currvidid, $currviddes, $autogencaptions, $currvidtags, $curthumb, $scs_ytap_shortcodes)
+function scs_ytap_createPost($currvidtitle, $scs_post_status, $currvidid, $currviddes, $autogencaptions, $currvidtags, $curthumb, $scs_ytap_shortcodes, $scs_post_category, $scs_post_author, $scs_post_date, $scs_yt_post_date)
 {
     //$currvidtitle [scs_ytap_video-title]
     //$currvidid [scs_ytap_video-id]
@@ -111,14 +113,18 @@ function scs_ytap_createPost($currvidtitle, $scs_post_status, $currvidid, $currv
     //$curthumb [scs_ytap_video-thumbnail]
 
     $currvididembed = "[embed]https://www.youtube.com/watch?v=" . $currvidid . "[/embed]";
-    
-    
-$scs_variables_array = [$currvidtitle,$currvidid,$currvididembed,$currviddes,$autogencaptions,$currvidtags,$curthumb];
-$scs_shortcodes_array = ["[scs_ytap_video-title]", "[scs_ytap_video-id]", "[scs_ytap_video-embed]", "[scs_ytap_video-description]", "[scs_ytap_video-captions]", "[scs_ytap_video-tags]", "[scs_ytap_video-thumbnail]"];
-for ($i=0;$i<count($scs_variables_array);$i++){
-    $scs_ytap_shortcodes = str_replace($scs_shortcodes_array[$i], $scs_variables_array[$i], $scs_ytap_shortcodes);
-}
+    $currvidtags = implode(",",$currvidtags);
 
+    //here we replace the shortcodes with the actal variables
+    $scs_variables_array = [$currvidtitle, $currvidid, $currvididembed, $currviddes, $autogencaptions, $currvidtags, $curthumb];
+    $scs_shortcodes_array = ["[scs_ytap_video-title]", "[scs_ytap_video-id]", "[scs_ytap_video-embed]", "[scs_ytap_video-description]", "[scs_ytap_video-captions]", "[scs_ytap_video-tags]", "[scs_ytap_video-thumbnail]"];
+    //var_dump($scs_ytap_shortcodes);
+    for ($i = 0; $i < count($scs_variables_array); $i++) {
+        $scs_ytap_shortcodes = str_replace($scs_shortcodes_array[$i], $scs_variables_array[$i], $scs_ytap_shortcodes);
+        
+    }
+
+    if ($scs_post_date == "When post is made") {$scs_post_date = the_date();} else { $scs_post_date = $scs_yt_post_date;}
     //echo "<pre>";
     //var_dump($scs_ytap_shortcodes);
     //echo "</pre>";
@@ -126,14 +132,15 @@ for ($i=0;$i<count($scs_variables_array);$i++){
     //then we create the post with minimum information, we will update the post later with more info
     $my_post = array(
         'post_title' => $currvidtitle,
-        'post_date' => the_date(),
+        'post_date' => $scs_post_date,
         'post_status' => $scs_post_status,
         'post_type' => 'post',
         //'post_content' => "[embed]https://www.youtube.com/watch?v=" . $currvidid . "[/embed]" . $currviddes . "<br> <h3>Auto Generated Captions</h3>" . $autogencaptions,
         'post_content' => $scs_ytap_shortcodes,
-        //'post_category' => autoselectcategory($data['items'][$j]['snippet']['title']),
+        'post_category' => array($scs_post_category),
         'tags_input' => $currvidtags,
         'meta_input' => array($currvidid),
+        'post_author' => $scs_post_author,
 
     );
     $the_post_id = wp_insert_post($my_post);
@@ -169,6 +176,18 @@ function post_status_array_loop($current)
     return $result;
 }
 
+function post_date_array_loop($current)
+{
+    $post_date_array = array("When post is made", "When YouTube video was published");
+    $result = "";
+    $selected = "";
+    foreach ($post_date_array as $post_date) {
+        if ($current == $post_date) {$selected = "selected='selected'";} else { $selected = "";}
+        $result .= "<option value='" . trim($post_date) . "' $selected>$post_date</option>";
+    }
+    return $result;
+}
+
 function scs_ytap_outputcss()
 {
     $css = "
@@ -185,21 +204,86 @@ function scs_ytap_outputcss()
     letter-spacing: .007px;
     text-transform: uppercase;}
 
+    input:out-of-range { 
+        border: 2px solid red;
+    }
+
+    /* Start CSS of the accordion */
+
+.accordion label {
+  display:block;
+  background-color: #ffffff;
+  padding: 0 15px;
+  height: 3em;
+  line-height: .5em;
+  color: #424242;
+  cursor: pointer;
+  border-bottom: 1px solid #000000;
+  border-top: 1px solid #ffffff;
+}
+.accordion div {
+  color: #424242;
+  padding: 10px;
+  font-size: 0.8em;
+  line-height: 1.7em;
+  opacity: 0;
+  display: none;
+  text-align: left;
+  background-color: #fff;
+  margin: 0px;
+}
+#tm:checked ~ .hiddentext {
+  display: block;
+  opacity: 1;
+}
+input#tm {
+  display: none;
+  position: relative;
+}
+#tn:checked ~ .hiddentext {
+  display: block;
+  opacity: 1;
+}
+input#tn {
+  display: none;
+  position: relative;
+}
+#to:checked ~ .hiddentext {
+  display: block;
+  opacity: 1;
+}
+input#to {
+  display: none;
+  position: relative;
+}
+.arrow{
+  color: #666666;
+}
+/*end accordion code*/
+form > h2 {font-size: 200%;}
+
+#scs_ytap_accordion > div > form > table:nth-child(6){background-color: #ffd4d4;}
+#scs_ytap_accordion > div > form > h2:nth-child(5){color: #FF0000;}
+#scs_ytap_accordion > div > form > table:nth-child(8){background-color: #d4ebff;}
+#scs_ytap_accordion > div > form > h2:nth-child(7){color: #0073AA;}
+#scs_ytap_accordion > div > form > table:nth-child(10){background-color: #d4ffe9;}
+#scs_ytap_accordion > div > form > h2:nth-child(9){color: #0F9D58;}
+.form-table th,.form-table td{padding: 5px;}
+
+.scsytapeg{font-size:70%;}
 </style>";
     echo $css;
 
 }
 function scs_ytap_outputjs()
 {
-    $js = '
+    $js = "
 <script>
 jQuery(document).ready(function($) {
-  
-    $(".scsytapdate").each(function() {
-       // $(this).datepicker();
-    });
+
+   
 })
-</script>';
+</script>";
     echo $js;
 
 }
