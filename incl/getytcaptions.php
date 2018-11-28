@@ -64,13 +64,13 @@ function getBaseClosedCaptionsUrl($videoId) {
 	$youtubeUrl = 'http://www.youtube.com/watch?v=';
 	$pageUrl = $youtubeUrl.$videoId;
 	if (!$responseText = file_get_contents($pageUrl)) {
-		die('Failed to load youtube url '.$pageUrl);
+		//die('Failed to load youtube url '.$pageUrl);
 	}
 	
 	//this gives an error, so i temporarely disabled it
 	$matches = [];
 	if (!preg_match('/TTS_URL\': "(.+?)"/is', $responseText, $matches)) {
-		die('Failed to find TTS_URL in page source for '.$pageUrl);
+	//	die('Failed to find TTS_URL in page source for '.$pageUrl);
 	}
 	
 	return str_replace(['\\u0026', '\\/'], ['&', '/'], $matches[1]);
@@ -87,12 +87,15 @@ function getAvailableTracks($baseUrl) {
 	$tracks = [];
 	
 	// "request list" command
+	//var_dump($listUrl);
+
 	$listUrl = $baseUrl.'&type=list&tlangs=1&fmts=1&vssids=1&asrs=1';
 	if (!$responseText = file_get_contents($listUrl)) {
-		die('Failed to load youtube TTS list url '.$listUrl);
+		
+		//die('Failed to load youtube TTS list url '.$listUrl);
 	}
 	if (!$responseXml = simplexml_load_string($responseText)) {
-		die(' Failed to decode Xml for '.$responseText);
+		//die(' Failed to decode Xml for '.$responseText);
 	}
 	if (!$responseXml->track) {
 		// no tracks found for this video (happens sometimes even though
@@ -138,13 +141,13 @@ function getAvailableTracks($baseUrl) {
 function getClosedCaptionText($baseUrl, array $track) {
 	$captionsUrl = $baseUrl."&type=track&lang={$track['lang']}&name=".urlencode($track['name'])."&kind={$track['kind']}&fmt=1";
 	if (!$responseText = file_get_contents($captionsUrl)) {
-		die('Failed to load youtube TTS captions track url '.$captionsUrl);
+		//die('Failed to load youtube TTS captions track url '.$captionsUrl);
 	}
 	if (!$responseXml = simplexml_load_string($responseText)) {
-		die(' Failed to decode Xml for '.$responseText);
+		//die(' Failed to decode Xml for '.$responseText);
 	}
 	if (!$responseXml->text) {
-		die(' Bad XML structure for '.$captionsUrl.' : '.$responseText);
+		//die(' Bad XML structure for '.$captionsUrl.' : '.$responseText);
 	}
 	
 	$videoText = [];

@@ -50,16 +50,18 @@ class MySettingsPage
     public function create_admin_page()
     {
         // Set class property
-        include dirname(__FILE__) . "/functions.php";
+        include dirname(__FILE__) . "/functions.php";        
         $this->options = get_option('scs_ytap_options');
-
+        scs_ytap_outputcss();
         ?>
          <div class="wrap">
             <h1>SCS YouTube Auto Poster Settings</h1>
-            <div style="background-color:#3398CC;color:#ffffff;font-size:130%;line-height:130%;padding:10px;">
-            I'm Mike, a <a href="http://mikemind.me/" style="color:#ffffff;font-weight:bold;" target="_blank">Full-Stack Web Developer Freelancer</a>, and you can contact me for feedback, bugs, feature requests or other work at 
-            <a href="mailto:admin@webwealth.me?Subject=Hello%20Mike" style="color:#ffffff;font-weight:bold;" target="_blank">admin@webwealth.me</a> or at my YouTube Channel: 
-            <a href="https://www.youtube.com/channel/UC3f86MEyfT0DLaa6uxbFF9w/videos" style="color:#ffffff;font-weight:bold;" target="_blank">MikeMindAcodeMY</a>
+            <div class="scs_mikemind">
+            I'm Mike, a <a href="http://mikemind.me/" target="_blank">Full-Stack Web Developer Freelancer</a>, and you can contact me for feedback, bugs, feature requests or other work at
+            <a href="mailto:admin@webwealth.me?Subject=Hello%20Mike" target="_blank">admin@webwealth.me</a> or at my YouTube Channel:
+            <a href="https://www.youtube.com/channel/UC3f86MEyfT0DLaa6uxbFF9w/videos" target="_blank">MikeMindAcodeMY</a>. </div>
+            <div class="scs_mikemind donate">
+            I don't drink beer nor coffee but you can <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=ERBYPAZV9Z9RC&source=url" target="_blank">donate here</a> to help me improve this plugin, create other cool free software and to spend more time with my family. Thank you! :)
             </div>
             <br>
             <div id="scs_ytap_accordion" class="accordion">
@@ -77,16 +79,18 @@ class MySettingsPage
             </form>
         </div>
         <form method="post" action="">
-        <input type="text" name="action" value="start" hidden>        
-        <input class="scs_ytap_ytbutton" type="submit" value="Make YT Posts!">
+        <input type="text" name="action" value="start" hidden><br>
+        <input class="scs_ytap_ytbutton" type="submit" value="Make YT Posts!"><br><br>        
         </form>
         </div>
-  </div> 
+  </div>
 
         <?php
-scs_ytap_outputcss();
-global $scs_apikey;
-if( ($scs_apikey == "") || (!isset($scs_apikey))){echo "<style>.hiddentext{display:block!important;opacity:1!important}</style>";}
+
+        global $scs_apikey;
+        if (($scs_apikey == "") || (!isset($scs_apikey))) {
+            //if no api key is set, the settings menu will be displayed initially
+            echo "<style>.hiddentext{display:block!important;opacity:1!important}</style>";}
 
         scs_ytap_outputjs();
 
@@ -212,7 +216,7 @@ if( ($scs_apikey == "") || (!isset($scs_apikey))){echo "<style>.hiddentext{displ
             'scs_ytap',
             'setting_section_scs_ytap_cron'
         );
- 
+
     }
 
     /**
@@ -227,7 +231,6 @@ if( ($scs_apikey == "") || (!isset($scs_apikey))){echo "<style>.hiddentext{displ
         if (isset($input['apikey'])) {
             $new_input['apikey'] = sanitize_text_field($input['apikey']);
         }
-               
 
         if (isset($input['channelId'])) {
             $new_input['channelId'] = sanitize_text_field($input['channelId']);
@@ -252,7 +255,7 @@ if( ($scs_apikey == "") || (!isset($scs_apikey))){echo "<style>.hiddentext{displ
         if (isset($input['scs_ytap_shortcodes'])) {
             //$new_input['scs_ytap_shortcodes'] = sanitize_text_field($input['scs_ytap_shortcodes']);
             $new_input['scs_ytap_shortcodes'] = sanitize_text_field(htmlspecialchars($input['scs_ytap_shortcodes']));
-            
+
         }
         if (isset($input['publishedAfter'])) {
             $new_input['publishedAfter'] = sanitize_text_field($input['publishedAfter']);
@@ -408,15 +411,15 @@ if( ($scs_apikey == "") || (!isset($scs_apikey))){echo "<style>.hiddentext{displ
         global $scs_ytap_shortcodes;
         global $autogencaptionsswitch;
         //here we replace the shortcode values with the actual variables
-        if (isset($this->options['scs_ytap_shortcodes'])) {
+        if (isset($this->options['scs_ytap_shortcodes'])) {           
             $scs_ytap_shortcodes = $this->options['scs_ytap_shortcodes'];} else { $scs_ytap_shortcodes = "";}
-            if (strpos($scs_ytap_shortcodes, '[scs_ytap_video-captions]') == false) {
-                $autogencaptionsswitch = false;
-            }else{$autogencaptionsswitch = true;}
+        if (strpos($scs_ytap_shortcodes, '[scs_ytap_video-captions]') == false) {
+            $autogencaptionsswitch = false;
+        } else { $autogencaptionsswitch = true;}
 
         printf(
             //<span title="Leave blank for default: [scs_ytap_video-embed] [scs_ytap_video-description] &lt;br&gt; &lt;h3&gt;Auto Generated Captions&lt;/h3&gt; [scs_ytap_video-captions]">
-            //Shortcodes: [scs_ytap_video-title] [scs_ytap_video-id] [scs_ytap_video-embed] [scs_ytap_video-description] [scs_ytap_video-captions] [scs_ytap_video-tags] [scs_ytap_video-thumbnail]</span><br>            
+            //Shortcodes: [scs_ytap_video-title] [scs_ytap_video-id] [scs_ytap_video-embed] [scs_ytap_video-description] [scs_ytap_video-captions] [scs_ytap_video-tags] [scs_ytap_video-thumbnail]</span><br>
             '       </span><br>
             <span><b>Shortcodes:</b></span><br>
             <span title="YouTube Video Title (used as post name as well)">[scs_ytap_video-title] eg: <span class="scsytapeg">Frontend Developer vs Backend Developer - What Should You Learn? (Funducational)</span></span><br>
@@ -428,10 +431,10 @@ if( ($scs_apikey == "") || (!isset($scs_apikey))){echo "<style>.hiddentext{displ
             <span title="YouTube Video Thumbnail (used as fetured image as well if theme supports)">[scs_ytap_video-thumbnail] eg: <span class="scsytapeg">https://i.ytimg.com/vi/yBA7lOu4W8Q/hqdefault.jpg</span></span><br>
             <i><span><b>TIP:</b> You can use HTML tags here, for eg use &lt;br&gt; for line break, &lt;hr&gt; for horizontal line etc</span></i><br>
             <i><span><b>Example:</b> [scs_ytap_video-embed] [scs_ytap_video-description] &lt;br&gt; &lt;h3&gt;Auto Generated Captions&lt;/h3&gt; [scs_ytap_video-captions]</span></i><br>
-            
-            
-            
-            <textarea rows="4" cols="50" id="scs_ytap_shortcodes" name="scs_ytap_options[scs_ytap_shortcodes]" value="" >%s</textarea>            
+
+
+
+            <textarea rows="4" cols="50" id="scs_ytap_shortcodes" name="scs_ytap_options[scs_ytap_shortcodes]" value="" >%s</textarea>
             <br> Note: [scs_ytap_video-captions] might not always work due to multiple reasons and are in no way proof read.',
             isset($this->options['scs_ytap_shortcodes']) ? esc_attr($this->options['scs_ytap_shortcodes']) : "[scs_ytap_video-embed] [scs_ytap_video-description] &lt;br&gt; &lt;h3&gt;Auto Generated Captions&lt;/h3&gt; [scs_ytap_video-captions]"
         );
@@ -464,7 +467,7 @@ if( ($scs_apikey == "") || (!isset($scs_apikey))){echo "<style>.hiddentext{displ
             '<input type="date" id="publishedBefore" class="scsytapdate" name="scs_ytap_options[publishedBefore]" value="%s" /> <span title="If facing issues, use Published After Date as well">(Optional)</span>',
             isset($this->options['publishedBefore']) ? esc_attr($this->options['publishedBefore']) : ''
         );
-        
+
     }
 
     public function cronDay_callback()
@@ -503,9 +506,11 @@ if( ($scs_apikey == "") || (!isset($scs_apikey))){echo "<style>.hiddentext{displ
         global $scs_post_author;
         global $scs_post_date;
         global $autogencaptionsswitch;
+        global $scs_ytap_output_result;
 
-        echo "<h1>POSTS CREATED! ...</h1>";
+        //echo "<h1>POSTS CREATED! ...</h1>";
 
+        $scs_ytap_output_result = "";
         $allwpytids = scs_ytap_getYtIdsFromPosts();
 
         $data = scs_ytap_getYtVideoListData($scs_apikey, $scs_channelId, $scs_noofvids, $scs_publishedAfter, $scs_publishedBefore);
@@ -515,40 +520,48 @@ if( ($scs_apikey == "") || (!isset($scs_apikey))){echo "<style>.hiddentext{displ
             //            echo "<pre>";
             // var_dump($data['items'][$j]);
             // echo "</pre>";
-            echo "<br><h2>Video $j:</h2>";
+                       
             $currvidid = $data['items'][$j]['id']['videoId'];
             $currvidtitle = $data['items'][$j]['snippet']['title'];
             $scs_yt_post_date = $data['items'][$j]['snippet']['publishedAt'];
+             $vidno = $j+1;
 
             //first we check if post was already created in wordpress by video id
-            if (!in_array($currvidid, $allwpytids)) {
+            if (!in_array($currvidid, $allwpytids)) {                
+                $scs_ytap_output_result .= "<div class='scsposted'><b>Video $vidno:</b> $currvidtitle <i>[$currvidid]</i> posted!</div>";
 
                 $viddata = scs_ytap_getYtVideoIndividualData($scs_apikey, $currvidid);
 
-                echo "ID: " . $currvidid . "<br>";
+                //echo "ID: " . $currvidid . "<br>";
                 $currviddes = $viddata['items'][0]['snippet']['description'];
+                //fix bug if video doesn't have description
+                if(!isset($currviddes)){$currviddes="";}
                 //echo "DESCRIPTION: " . $currviddes . "<br>";
                 $curthumb = $viddata['items'][0]['snippet']['thumbnails']['high']['url'];
                 //echo "THUMBNAIL: " . $curthumb . "<br>";
                 //todo category id and matches category from site
                 $currvidcatid = $viddata['items'][0]['snippet']['categoryId'];
                 //echo "CATEGORY ID: " . $currvidcatid . "<br>";
-                $currvidtags = $viddata['items'][0]['snippet']['tags'];
+                //fix bug if video doesn't have tags                
+                //if((isset($viddata['items'][0]['snippet']['tags']))||($viddata['items'][0]['snippet']['tags'] != false))
+                if(isset($viddata['items'][0]['snippet']['tags']))
+                {$currvidtags = $viddata['items'][0]['snippet']['tags'];}else{$currvidtags=["yt","youtube"];}                
                 //echo "TAGS: " . $currvidtags . "<br>";
 
                 for ($i = 0; $i < count($currvidtags); $i++) {
                     // echo $currvidtags[$i] . ", ";
                 }
                 //then we get the autogenerated captions
-if($autogencaptionsswitch){$autogencaptions = getClosedCaptionsForVideo($currvidid);}else{$autogencaptions = "";}
-          
+                if ($autogencaptionsswitch) {$autogencaptions = getClosedCaptionsForVideo($currvidid);} else { $autogencaptions = "";}
 
                 scs_ytap_createPost($currvidtitle, $scs_post_status, $currvidid, $currviddes, $autogencaptions, $currvidtags, $curthumb, $scs_ytap_shortcodes, $scs_post_category, $scs_post_author, $scs_post_date, $scs_yt_post_date);
 
-            } else {echo "Video <b>'" . $currvidtitle . "'</b> already posted! <br>";}
+            } else {$scs_ytap_output_result .= "<div class='scsalreadyposted'><b>Video $vidno:</b> $currvidtitle <i>[$currvidid]</i> already posted!</div>";}
 
         }
 
+        
+        echo "<div class='scsemulatetextarea'><b>Output log:</b><br>".$scs_ytap_output_result."</div>";
     }
 
 }

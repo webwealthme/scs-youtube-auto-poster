@@ -1,0 +1,137 @@
+*{box-sizing: border-box!important;}
+.scs_ytap_ytbutton {
+    background-color: #FF0000;
+    border-radius: 2px;
+    color: white;
+    padding: 10px 16px;
+    margin: 4px;
+    white-space: nowrap;
+    font-size: 1.4rem;
+    font-weight: 500;
+    letter-spacing: .007px;
+    text-transform: uppercase;
+}
+
+input:out-of-range {
+    border: 2px solid red;
+}
+
+/* Start CSS of the accordion */
+
+.accordion > label {
+    display: block;
+    background-color: #ffffff;
+    padding: 0 15px;
+    height: 3em;
+    line-height: .5em;
+    color: #424242;
+    cursor: pointer;
+    border-bottom: 1px solid #000000;
+    border-top: 1px solid #ffffff;
+}
+
+.accordion > div {
+    color: #424242;
+    padding: 10px;
+    font-size: 0.8em;
+    line-height: 1.7em;
+    opacity: 0;
+    display: none;
+    text-align: left;
+    background-color: #fff;
+    margin: 0px;
+}
+
+#tm:checked~.hiddentext {
+    display: block;
+    opacity: 1;
+}
+
+input#tm {
+    display: none;
+    position: relative;
+}
+
+#tn:checked~.hiddentext {
+    display: block;
+    opacity: 1;
+}
+
+input#tn {
+    display: none;
+    position: relative;
+}
+
+#to:checked~.hiddentext {
+    display: block;
+    opacity: 1;
+}
+
+input#to {
+    display: none;
+    position: relative;
+}
+
+.arrow {
+    color: #666666;
+}
+
+/*end accordion code*/
+form>h2 {
+    font-size: 200%;
+}
+
+#scs_ytap_accordion>div>form>table:nth-child(6) {
+    background-color: #ffd4d4;
+}
+
+#scs_ytap_accordion>div>form>h2:nth-child(5) {
+    color: #FF0000;
+}
+
+#scs_ytap_accordion>div>form>table:nth-child(8) {
+    background-color: #d4ebff;
+}
+
+#scs_ytap_accordion>div>form>h2:nth-child(7) {
+    color: #0073AA;
+}
+
+#scs_ytap_accordion>div>form>table:nth-child(10) {
+    background-color: #d4ffe9;
+}
+
+#scs_ytap_accordion>div>form>h2:nth-child(9) {
+    color: #0F9D58;
+}
+
+.form-table th,
+.form-table td {
+    padding: 5px;
+}
+
+.form-table th {
+    vertical-align: middle;
+}
+
+.scsytapeg {
+    font-size: 70%;
+}
+
+.scsemulatetextarea {
+    width: 100%;
+    width: 300px;
+    height: 200px;
+    border: 1px solid #ccc;
+    padding: 5px;
+    overflow: scroll;
+    width: 100%;
+    background-color: #ffffff;
+}
+
+.scsalreadyposted {color:red;}
+.scsposted {color:green;}
+
+.scs_mikemind{background-color:#3398CC;color:#ffffff;font-size:110%;line-height:110%;padding:5px;}
+.scs_mikemind a{color:#ffffff;font-weight:bold;}
+.donate{background-color:#F26722}
