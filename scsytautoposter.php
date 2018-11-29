@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       SCS YouTube Auto Poster
  * Description:       Auto Posts newest YouTube videos from the Youtube channel(s) of your choice.
- * Version:           2018.11.23
+ * Version:           2018.11.28
  * Author:            Mike Mind
  * Author URI:        https://mikemind.me
  * Text Domain:       mikemind.me
@@ -40,7 +40,7 @@ class MySettingsPage
             'manage_options',
             'scs_ytap',
             array($this, 'create_admin_page')
-            //array($this, 'tytttap')
+            //array($this, 'scs_ytap_main')
         );
     }
 
@@ -50,10 +50,12 @@ class MySettingsPage
     public function create_admin_page()
     {
         // Set class property
-        include dirname(__FILE__) . "/functions.php";        
+        require_once dirname(__FILE__) . "/functions.php";
+
         $this->options = get_option('scs_ytap_options');
         scs_ytap_outputcss();
         ?>
+
          <div class="wrap">
             <h1>SCS YouTube Auto Poster Settings</h1>
             <div class="scs_mikemind">
@@ -80,7 +82,7 @@ class MySettingsPage
         </div>
         <form method="post" action="">
         <input type="text" name="action" value="start" hidden><br>
-        <input class="scs_ytap_ytbutton" type="submit" value="Make YT Posts!"><br><br>        
+        <input class="scs_ytap_ytbutton" type="submit" value="Make YT Posts!"><br><br>
         </form>
         </div>
   </div>
@@ -96,7 +98,7 @@ class MySettingsPage
 
         if (isset($_POST['action'])) {
             // echo $_POST['action'];
-            $this->tytttap();}
+            $this->scs_ytap_main();}
 
     }
 
@@ -204,15 +206,8 @@ class MySettingsPage
         );
         add_settings_field(
             'scs_ytap_cronDay',
-            'Automatically check/post every',
+            'Automatically check/post',
             array($this, 'cronDay_callback'),
-            'scs_ytap',
-            'setting_section_scs_ytap_cron'
-        );
-        add_settings_field(
-            'scs_ytap_cronHour',
-            'Automatically check/post every',
-            array($this, 'cronHour_callback'),
             'scs_ytap',
             'setting_section_scs_ytap_cron'
         );
@@ -265,9 +260,6 @@ class MySettingsPage
         }
         if (isset($input['cronDay'])) {
             $new_input['cronDay'] = sanitize_text_field($input['cronDay']);
-        }
-        if (isset($input['cronHour'])) {
-            $new_input['cronHour'] = sanitize_text_field($input['cronHour']);
         }
 
         return $new_input;
@@ -411,7 +403,7 @@ class MySettingsPage
         global $scs_ytap_shortcodes;
         global $autogencaptionsswitch;
         //here we replace the shortcode values with the actual variables
-        if (isset($this->options['scs_ytap_shortcodes'])) {           
+        if (isset($this->options['scs_ytap_shortcodes'])) {
             $scs_ytap_shortcodes = $this->options['scs_ytap_shortcodes'];} else { $scs_ytap_shortcodes = "";}
         if (strpos($scs_ytap_shortcodes, '[scs_ytap_video-captions]') == false) {
             $autogencaptionsswitch = false;
@@ -473,28 +465,43 @@ class MySettingsPage
     public function cronDay_callback()
     {global $scs_cronDay;
         if (isset($this->options['cronDay'])) {
-            $scs_cronDay = $this->options['cronDay'];} else { $scs_cronDay = "";}
+            $scs_cronDay = $this->options['cronDay'];} else { $scs_cronDay = "OFF";}
+
+        $post_cronDay_code = post_cronDay_array_loop($scs_cronDay);
 
         printf(
-            '<input type="number" id="cronDay" name="scs_ytap_options[cronDay]" min="1" max="999" value="%s" />days (1-999)',
-            isset($this->options['cronDay']) ? esc_attr($this->options['cronDay']) : ''
+            '<select id="cronDay" name="scs_ytap_options[cronDay]" value="%s">
+            ' . $post_cronDay_code . '
+      </select> (Optional: Automatically create posts using <a href="https://developer.wordpress.org/plugins/cron/"
+      title="WP-Cron does not run constantly as the system cron does; it is only triggered on page load." target="_blank">WPcron</a>)',
+            isset($this->options['cronDay']) ? esc_attr($this->options['cronDay']) : 'OFF'
         );
+
+        if (isset($scs_cronDay)) {
+            if ($scs_cronDay != "OFF") {
+                //unschedule the cron first to set it with new value
+                if (wp_next_scheduled('scs_ytap_cron_event')) {
+                    $timestamp = wp_next_scheduled('scs_ytap_cron_event');
+                    wp_unschedule_event($timestamp, 'scs_ytap_cron_event');
+                }
+
+                //check to see if cron is already scheduled
+                if (!wp_next_scheduled('scs_ytap_cron_event')) {
+                    wp_schedule_event(time(), $scs_cronDay, 'scs_ytap_cron_event');
+                }
+            } else {
+                //this will unschedule the cron
+                if (wp_next_scheduled('scs_ytap_cron_event')) {
+                    $timestamp = wp_next_scheduled('scs_ytap_cron_event');
+                    wp_unschedule_event($timestamp, 'scs_ytap_cron_event');
+                }
+            }
+
+        }
     }
 
-    public function cronHour_callback()
-    {global $scs_cronHour;
-        if (isset($this->options['cronHour'])) {
-            $scs_cronHour = $this->options['cronHour'];} else { $scs_cronHour = "";}
-
-        printf(
-            '<input type="number" id="cronHour" name="scs_ytap_options[cronHour]" min="0" max="23" value="%s" />hours (0-23)',
-            isset($this->options['cronHour']) ? esc_attr($this->options['cronHour']) : ''
-        );
-    }
-
-    public function tytttap()
+    public function scs_ytap_main()
     {
-
         global $scs_apikey;
         global $scs_channelId;
         global $scs_noofvids;
@@ -520,14 +527,14 @@ class MySettingsPage
             //            echo "<pre>";
             // var_dump($data['items'][$j]);
             // echo "</pre>";
-                       
+
             $currvidid = $data['items'][$j]['id']['videoId'];
             $currvidtitle = $data['items'][$j]['snippet']['title'];
             $scs_yt_post_date = $data['items'][$j]['snippet']['publishedAt'];
-             $vidno = $j+1;
+            $vidno = $j + 1;
 
             //first we check if post was already created in wordpress by video id
-            if (!in_array($currvidid, $allwpytids)) {                
+            if (!in_array($currvidid, $allwpytids)) {
                 $scs_ytap_output_result .= "<div class='scsposted'><b>Video $vidno:</b> $currvidtitle <i>[$currvidid]</i> posted!</div>";
 
                 $viddata = scs_ytap_getYtVideoIndividualData($scs_apikey, $currvidid);
@@ -535,17 +542,16 @@ class MySettingsPage
                 //echo "ID: " . $currvidid . "<br>";
                 $currviddes = $viddata['items'][0]['snippet']['description'];
                 //fix bug if video doesn't have description
-                if(!isset($currviddes)){$currviddes="";}
+                if (!isset($currviddes)) {$currviddes = "";}
                 //echo "DESCRIPTION: " . $currviddes . "<br>";
                 $curthumb = $viddata['items'][0]['snippet']['thumbnails']['high']['url'];
                 //echo "THUMBNAIL: " . $curthumb . "<br>";
                 //todo category id and matches category from site
                 $currvidcatid = $viddata['items'][0]['snippet']['categoryId'];
                 //echo "CATEGORY ID: " . $currvidcatid . "<br>";
-                //fix bug if video doesn't have tags                
+                //fix bug if video doesn't have tags
                 //if((isset($viddata['items'][0]['snippet']['tags']))||($viddata['items'][0]['snippet']['tags'] != false))
-                if(isset($viddata['items'][0]['snippet']['tags']))
-                {$currvidtags = $viddata['items'][0]['snippet']['tags'];}else{$currvidtags=["yt","youtube"];}                
+                if (isset($viddata['items'][0]['snippet']['tags'])) {$currvidtags = $viddata['items'][0]['snippet']['tags'];} else { $currvidtags = ["yt", "youtube"];}
                 //echo "TAGS: " . $currvidtags . "<br>";
 
                 for ($i = 0; $i < count($currvidtags); $i++) {
@@ -556,16 +562,41 @@ class MySettingsPage
 
                 scs_ytap_createPost($currvidtitle, $scs_post_status, $currvidid, $currviddes, $autogencaptions, $currvidtags, $curthumb, $scs_ytap_shortcodes, $scs_post_category, $scs_post_author, $scs_post_date, $scs_yt_post_date);
 
-            } else {$scs_ytap_output_result .= "<div class='scsalreadyposted'><b>Video $vidno:</b> $currvidtitle <i>[$currvidid]</i> already posted!</div>";}
+            } else { $scs_ytap_output_result .= "<div class='scsalreadyposted'><b>Video $vidno:</b> $currvidtitle <i>[$currvidid]</i> already posted!</div>";}
 
         }
 
-        
-        echo "<div class='scsemulatetextarea'><b>Output log:</b><br>".$scs_ytap_output_result."</div>";
+        echo "<div class='scsemulatetextarea'><b>Output log:</b><br>" . $scs_ytap_output_result . "</div>";
+
     }
 
 }
 
-if (is_admin()) {
-    $my_settings_page = new MySettingsPage();
+//if (is_admin()) {
+$my_settings_page = new MySettingsPage();
+//}
+
+//set a cron job
+/*register_activation_hook(__FILE__, 'scs_ytap_cron_activation');
+
+function scs_ytap_cron_activation() {
+if (! wp_next_scheduled ( 'scs_ytap_cron_event' )) {
+wp_schedule_event(time(), 'hourly', 'scs_ytap_cron_event');
+}
+}
+ */
+add_action('scs_ytap_cron_event', 'do_scs_ytap_cron');
+
+function do_scs_ytap_cron()
+{
+//do something
+    require_once dirname(__FILE__) . "/cron.php";
+
+}
+
+register_deactivation_hook(__FILE__, 'scs_ytap_cron_deactivation');
+
+function scs_ytap_cron_deactivation()
+{
+    wp_clear_scheduled_hook('scs_ytap_cron_event');
 }

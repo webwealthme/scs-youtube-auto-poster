@@ -190,6 +190,18 @@ function post_date_array_loop($current)
     return $result;
 }
 
+function post_cronDay_array_loop($current)
+{
+    $post_cronDay_array = array("OFF","hourly", "twicedaily", "daily");
+    $result = "";
+    $selected = "";
+    foreach ($post_cronDay_array as $cronDay) {
+        if ($current == $cronDay) {$selected = "selected='selected'";} else { $selected = "";}
+        $result .= "<option value='" . $cronDay . "' $selected>".ucfirst($cronDay)."</option>";
+    }
+    return $result;
+}
+
 function scs_ytap_outputcss()
 {
     echo "<style>";
