@@ -11,7 +11,7 @@ Easy settings: You just need an api key and the yt channel id
 Choose the number of created posts at once. Get up to 50 videos at once, if you need more use the before and after date of the video
 Choose post settings: post status, post author, post category, post publish date (when post is made or when it was published on yt)
 
-##Use shortcodes to customize post content
+## Use shortcodes to customize post content
 [scs_ytap_video-title] eg: Frontend Developer vs Backend Developer - What Should You Learn? (Funducational)
 [scs_ytap_video-id] eg: yBA7lOu4W8Q
 [scs_ytap_video-embed] eg: [embed]https://www.youtube.com/watch?v=yBA7lOu4W8Q[/embed]
