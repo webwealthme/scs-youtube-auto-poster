@@ -1,7 +1,6 @@
 <?php
 //include necessary files
-include dirname(__FILE__) . "/incl/getytcaptions.php";
-//include dirname(__FILE__) . "/tempinfo.php";
+require_once dirname(__FILE__) . "/incl/getytcaptions.php";
 
 //define constants
 //this fixes the file_get_contents
