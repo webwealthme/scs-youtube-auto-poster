@@ -1,6 +1,8 @@
 # SCS Youtube Auto Poster - Wordpress Plugin
 Auto Posts newest YouTube Videos from the YouTube channel(s) of your choice.  
 
+![SCS YouTube AutoPoster](https://raw.githubusercontent.com/webwealthme/scs-yt-autoposter/img/screenshot.jpg)
+
 Using this plugin you can manually or automatically (using WPcron job) make WordPress YouTube embedded posts which automatically adds:  
 - YouTube video title as post title
 - YouTube video tags as post tags
