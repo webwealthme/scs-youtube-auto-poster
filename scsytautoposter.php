@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name:       SCS YouTube Auto Poster
- * Description:       Auto Posts newest YouTube videos from the Youtube channel(s) of your choice.
- * Version:           2018.11.28
+ * Description:       Auto Posts newest YouTube videos from the YouTube channel(s) of your choice.
+ * Version:           2018.11.29
  * Author:            Mike Mind
  * Author URI:        https://mikemind.me
  * Text Domain:       mikemind.me
