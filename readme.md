@@ -22,7 +22,7 @@ Choose post settings: post status, post author, post category, post publish date
 TIP: You can use HTML tags here, for eg use <br> for line break, <hr> for horizontal line etc
 Example: [scs_ytap_video-embed] [scs_ytap_video-description] <br> <h3>Auto Generated Captions</h3> [scs_ytap_video-captions]
 
-##Posting automatization using cron:
+## Posting automatization using cron:
 Hourly, Twicedaily, Daily
 
 # How to install?
