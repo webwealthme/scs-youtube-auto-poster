@@ -15,17 +15,19 @@
  * @param string $videoId
  * @return mixed Closed Caption text or NULL if no tracks or text are found
  */
-function getClosedCaptionsForVideo($videoId) {
-	$baseUrl = getBaseClosedCaptionsUrl($videoId);
+function scs_ytap_getClosedCaptionsForVideo($videoId) {
+	$baseUrl = scs_ytap_getBaseClosedCaptionsUrl($videoId);
 	
 	// find available languages. options vary widely from
 	// video to video, and sometimes garbage is returned.
 	// tracks are returned in order we think is best - 
 	// try first, if its garbage, try 2nd, etc.
-	$availableTracks = getAvailableTracks($baseUrl);
+	//fix if no captions
+	if (strpos($baseUrl, 'youtube.com') !== false) {
+	$availableTracks = scs_ytap_getAvailableTracks($baseUrl);
 	$text = null;
 	foreach ($availableTracks as $track) {
-		$text = getClosedCaptionText($baseUrl, $track);
+		$text = scs_ytap_getClosedCaptionText($baseUrl, $track);
 		
 		// check for garbage
 		if (stripos($text, '[Content_Types]') !== false) {
@@ -47,7 +49,7 @@ function getClosedCaptionsForVideo($videoId) {
 		// for now just wrap in paragraph tags
 		$text = "<p>{$text}</p>";
 	}
-	
+}else{$text = "<p></p>";}
 	return $text;
 }
 
@@ -60,7 +62,7 @@ function getClosedCaptionsForVideo($videoId) {
  * @param string $videoId
  * @return string The base URL for TimedText requests
  */
-function getBaseClosedCaptionsUrl($videoId) {
+function scs_ytap_getBaseClosedCaptionsUrl($videoId) {
 	$youtubeUrl = 'http://www.youtube.com/watch?v=';
 	$pageUrl = $youtubeUrl.$videoId;
 	if (!$responseText = file_get_contents($pageUrl)) {
@@ -80,12 +82,13 @@ function getBaseClosedCaptionsUrl($videoId) {
  * returns them in a sorted array ("scored" from highest
  * to lowest based on things like `default_language` etc)
  * 
- * @param string $baseUrl Base URL found by calling getBaseClosedCaptionsUrl()
+ * @param string $baseUrl Base URL found by calling scs_ytap_getBaseClosedCaptionsUrl()
  * @return array An array of Closed Captions tracks available for this video
  */
-function getAvailableTracks($baseUrl) {
+function scs_ytap_getAvailableTracks($baseUrl) {
 	$tracks = [];
-	
+	//var_dump($baseUrl);
+
 	// "request list" command
 	//var_dump($listUrl);
 
@@ -134,11 +137,11 @@ function getAvailableTracks($baseUrl) {
  * If found, decode and strip tags from response, and join each line
  * with a "<br />" and a "\n"
  * 
- * @param string $baseUrl Base URL found by calling getBaseClosedCaptionsUrl()
+ * @param string $baseUrl Base URL found by calling scs_ytap_getBaseClosedCaptionsUrl()
  * @param array $track Specific track to request
  * @return string Closed captions text for video & track combo
  */
-function getClosedCaptionText($baseUrl, array $track) {
+function scs_ytap_getClosedCaptionText($baseUrl, array $track) {
 	$captionsUrl = $baseUrl."&type=track&lang={$track['lang']}&name=".urlencode($track['name'])."&kind={$track['kind']}&fmt=1";
 	if (!$responseText = file_get_contents($captionsUrl)) {
 		//die('Failed to load youtube TTS captions track url '.$captionsUrl);
@@ -160,8 +163,3 @@ function getClosedCaptionText($baseUrl, array $track) {
 	return implode("<br />\n", $videoText);
 }
 
-//echo "SOMETHING!";
-//echo "<br>";
-//echo "<pre>";
-//var_dump(getClosedCaptionsForVideo("NSwlHnSs0Yk"));
-//echo "</pre>";

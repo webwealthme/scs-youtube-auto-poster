@@ -4,30 +4,7 @@ require_once dirname(__FILE__) . "/incl/getytcaptions.php";
 
 //define constants
 //this fixes the file_get_contents
-define("FIXFILEGET", serialize(array("ssl" => array("verify_peer" => false, "verify_peer_name" => false))));
-
-//todo automatically choose category based on title
-function autoselectcategory($titleinfunc)
-{
-
-    $thiscat = 0;
-    $titleinfunc = strtolower($titleinfunc);
-    if (strpos($titleinfunc, 'bryan') !== false) {
-        $thiscat = 157;
-    } elseif (strpos($titleinfunc, 'talk') !== false) {
-        $thiscat = 24;
-    } else {
-        $thiscat = 0;
-    }
-
-    if ($thiscat != 0) {
-        $defaultcat = array(2, 6, $thiscat);
-    } else { $defaultcat = array(2, 6);}
-
-    return $defaultcat;
-
-//echo "result".
-}
+define("SCSYTAPFIXFILEGET", serialize(array("ssl" => array("verify_peer" => false, "verify_peer_name" => false))));
 
 // get all the yt ids from all wp posts to not repost again
 function scs_ytap_getYtIdsFromPosts()
@@ -54,7 +31,7 @@ function scs_ytap_addPostFeatImgFromYt($currvidid, $curthumb, $the_post_id)
     $uploaddir = wp_upload_dir();
     $uploadfile = $uploaddir['path'] . '/' . $filename;
 
-    $contents = file_get_contents($curthumb, false, stream_context_create(unserialize(FIXFILEGET)));
+    $contents = file_get_contents($curthumb, false, stream_context_create(unserialize(SCSYTAPFIXFILEGET)));
     $savefile = fopen($uploadfile, 'w');
     fwrite($savefile, $contents);
     fclose($savefile);
@@ -86,7 +63,7 @@ function scs_ytap_getYtVideoListData($scs_apikey, $scs_channelId, $scs_noofvids,
 
     $yturl = "https://www.googleapis.com/youtube/v3/search?key=" . $scs_apikey . "&channelId=" . $scs_channelId . "&part=snippet,id" . $orderbydate . "&maxResults=" . $scs_noofvids . $scs_publishedAfter . $scs_publishedBefore;
     //echo $yturl;
-    $json = file_get_contents($yturl, false, stream_context_create(unserialize(FIXFILEGET)));
+    $json = file_get_contents($yturl, false, stream_context_create(unserialize(SCSYTAPFIXFILEGET)));
     $data = json_decode($json, true);
     return $data;
 }
@@ -95,7 +72,7 @@ function scs_ytap_getYtVideoListData($scs_apikey, $scs_channelId, $scs_noofvids,
 function scs_ytap_getYtVideoIndividualData($scs_apikey, $currvidid)
 {
     $ytvidurl = "https://www.googleapis.com/youtube/v3/videos?part=id%2C+snippet&id=" . $currvidid . "&key=" . $scs_apikey;
-    $jsonvid = file_get_contents($ytvidurl, false, stream_context_create(unserialize(FIXFILEGET)));
+    $jsonvid = file_get_contents($ytvidurl, false, stream_context_create(unserialize(SCSYTAPFIXFILEGET)));
     $viddata = json_decode($jsonvid, true);
     return $viddata;
 
@@ -165,7 +142,7 @@ function scs_ytap_createPost($currvidtitle, $scs_post_status, $currvidid, $currv
     return $the_post_id;
 }
 
-function post_status_array_loop($current)
+function scs_ytap_post_status_array_loop($current)
 {
     $post_status_array = array("draft", "publish", "pending", "private", "trash", "inherit");
     $result = "";
@@ -177,7 +154,7 @@ function post_status_array_loop($current)
     return $result;
 }
 
-function post_date_array_loop($current)
+function scs_ytap_post_date_array_loop($current)
 {
     $post_date_array = array("When post is made", "When YouTube video was published");
     $result = "";
@@ -189,7 +166,7 @@ function post_date_array_loop($current)
     return $result;
 }
 
-function post_cronDay_array_loop($current)
+function scs_ytap_post_cronDay_array_loop($current)
 {
     $post_cronDay_array = array("OFF","hourly", "twicedaily", "daily");
     $result = "";

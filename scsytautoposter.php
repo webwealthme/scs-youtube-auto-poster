@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       SCS YouTube Auto Poster
  * Description:       Auto Posts newest YouTube videos from the YouTube channel(s) of your choice.
- * Version:           2018.11.29
+ * Version:           2018.11.30
  * Author:            Mike Mind
  * Author URI:        https://mikemind.me
  * Text Domain:       mikemind.me
@@ -12,8 +12,20 @@
  */
 
 //here we make the settings menu
-class MySettingsPage
+class scs_ytap_SettingsPage
 {
+    public $scs_apikey,
+    $scs_channelId,
+    $scs_noofvids,
+    $scs_post_status,
+    $scs_post_category,
+    $scs_post_author,
+    $scs_post_date,
+    $scs_ytap_shortcodes,
+    $autogencaptionsswitch,
+    $scs_publishedAfter,
+    $scs_publishedBefore,
+        $scs_cronDay;
     /**
      * Holds the values to be used in the fields callbacks
      */
@@ -89,15 +101,14 @@ class MySettingsPage
 
         <?php
 
-        global $scs_apikey;
-        if (($scs_apikey == "") || (!isset($scs_apikey))) {
+        if (($this->scs_apikey == "") || (!isset($this->scs_apikey))) {
             //if no api key is set, the settings menu will be displayed initially
             echo "<style>.hiddentext{display:block!important;opacity:1!important}</style>";}
 
         scs_ytap_outputjs();
 
         if (isset($_POST['action'])) {
-            // echo $_POST['action'];
+
             $this->scs_ytap_main();}
 
     }
@@ -286,9 +297,9 @@ class MySettingsPage
 
     public function apikey_callback()
     {
-        global $scs_apikey;
+
         if (isset($this->options['apikey'])) {
-            $scs_apikey = $this->options['apikey'];} else { $scs_apikey = "";}
+            $this->scs_apikey = $this->options['apikey'];} else { $this->scs_apikey = "";}
 
         printf(
             '<input type="text" id="apikey" name="scs_ytap_options[apikey]" value="%s" required /> <a href="https://developers.google.com/youtube/v3/getting-started" target="_blank">How to get one?</a>',
@@ -297,9 +308,9 @@ class MySettingsPage
     }
 
     public function channelId_callback()
-    {global $scs_channelId;
+    {
         if (isset($this->options['channelId'])) {
-            $scs_channelId = $this->options['channelId'];} else { $scs_channelId = "";}
+            $this->scs_channelId = $this->options['channelId'];} else { $this->scs_channelId = "";}
         printf(
             '<input type="text" id="channelId" name="scs_ytap_options[channelId]" value="%s" required /> eg: <b title="https://www.youtube.com/channel/UC3f86MEyfT0DLaa6uxbFF9w">UC3f86MEyfT0DLaa6uxbFF9w</b>',
             isset($this->options['channelId']) ? esc_attr($this->options['channelId']) : ''
@@ -307,9 +318,9 @@ class MySettingsPage
     }
 
     public function noofvids_callback()
-    {global $scs_noofvids;
+    {
         if (isset($this->options['noofvids'])) {
-            $scs_noofvids = $this->options['noofvids'];} else { $scs_noofvids = "";}
+            $this->scs_noofvids = $this->options['noofvids'];} else { $this->scs_noofvids = "";}
 
         printf(
             '<input type="number" id="noofvids" name="scs_ytap_options[noofvids]" min="1" max="50" value="%s" required /> <span title="Maximum 50 videos at the moment, use published before and after to get older videos">(1-50)</span>',
@@ -319,11 +330,11 @@ class MySettingsPage
 
     public function post_status_callback()
     {
-        global $scs_post_status;
-        if (isset($this->options['post_status'])) {
-            $scs_post_status = $this->options['post_status'];} else { $scs_post_status = "";}
 
-        $post_status_code = post_status_array_loop($scs_post_status);
+        if (isset($this->options['post_status'])) {
+            $this->scs_post_status = $this->options['post_status'];} else { $this->scs_post_status = "";}
+
+        $post_status_code = scs_ytap_post_status_array_loop($this->scs_post_status);
 
         printf(
             '<select id="post_status" name="scs_ytap_options[post_status]" value="%s">
@@ -336,16 +347,15 @@ class MySettingsPage
 
     public function post_category_callback()
     {
-        global $scs_post_category;
 
         if (isset($this->options['post_category'])) {
-            $scs_post_category = $this->options['post_category'];} else { $scs_post_category = "";}
+            $this->scs_post_category = $this->options['post_category'];} else { $this->scs_post_category = "";}
 
         $categories = get_categories(array('hide_empty' => 0));
 
         $post_category_code = "";
         foreach ($categories as $category) {
-            if ($scs_post_category == $category->term_id) {$selected = "selected='selected'";} else { $selected = "";}
+            if ($this->scs_post_category == $category->term_id) {$selected = "selected='selected'";} else { $selected = "";}
             $post_category_code .= '<option class="" value="' . $category->term_id . '" ' . $selected . '>' . $category->name . '</option>';
         }
 
@@ -360,15 +370,15 @@ class MySettingsPage
 
     public function post_author_callback()
     {
-        global $scs_post_author;
+
         if (isset($this->options['post_author'])) {
-            $scs_post_author = $this->options['post_author'];} else { $scs_post_author = "";}
+            $this->scs_post_author = $this->options['post_author'];} else { $this->scs_post_author = "";}
 
         $authors = get_users();
 
         $post_author_code = "";
         foreach ($authors as $author) {
-            if ($scs_post_author == $author->ID) {$selected = "selected='selected'";} else { $selected = "";}
+            if ($this->scs_post_author == $author->ID) {$selected = "selected='selected'";} else { $selected = "";}
             $post_author_code .= '<option class="" value="' . $author->ID . '" ' . $selected . '>' . $author->user_nicename . '</option>';
         }
 
@@ -383,11 +393,11 @@ class MySettingsPage
 
     public function post_date_callback()
     {
-        global $scs_post_date;
-        if (isset($this->options['post_date'])) {
-            $scs_post_date = $this->options['post_date'];} else { $scs_post_date = "";}
 
-        $post_date_code = post_date_array_loop($scs_post_date);
+        if (isset($this->options['post_date'])) {
+            $this->scs_post_date = $this->options['post_date'];} else { $this->scs_post_date = "";}
+
+        $post_date_code = scs_ytap_post_date_array_loop($this->scs_post_date);
 
         printf(
             '<select id="post_date" name="scs_ytap_options[post_date]" value="%s">
@@ -400,14 +410,13 @@ class MySettingsPage
 
     public function scs_ytap_shortcodes_callback()
     {
-        global $scs_ytap_shortcodes;
-        global $autogencaptionsswitch;
+
         //here we replace the shortcode values with the actual variables
         if (isset($this->options['scs_ytap_shortcodes'])) {
-            $scs_ytap_shortcodes = $this->options['scs_ytap_shortcodes'];} else { $scs_ytap_shortcodes = "";}
-        if (strpos($scs_ytap_shortcodes, '[scs_ytap_video-captions]') == false) {
-            $autogencaptionsswitch = false;
-        } else { $autogencaptionsswitch = true;}
+            $this->scs_ytap_shortcodes = $this->options['scs_ytap_shortcodes'];} else { $this->scs_ytap_shortcodes = "";}
+        if (strpos($this->scs_ytap_shortcodes, '[scs_ytap_video-captions]') == false) {
+            $this->autogencaptionsswitch = false;
+        } else { $this->autogencaptionsswitch = true;}
 
         printf(
             //<span title="Leave blank for default: [scs_ytap_video-embed] [scs_ytap_video-description] &lt;br&gt; &lt;h3&gt;Auto Generated Captions&lt;/h3&gt; [scs_ytap_video-captions]">
@@ -430,19 +439,13 @@ class MySettingsPage
             <br> Note: [scs_ytap_video-captions] might not always work due to multiple reasons and are in no way proof read.',
             isset($this->options['scs_ytap_shortcodes']) ? esc_attr($this->options['scs_ytap_shortcodes']) : "[scs_ytap_video-embed] [scs_ytap_video-description] &lt;br&gt; &lt;h3&gt;Auto Generated Captions&lt;/h3&gt; [scs_ytap_video-captions]"
         );
-//$currvidtitle [scs_ytap_video-title]
-        //$currvidid [scs_ytap_video-id]
-        //$currviddes [scs_ytap_video-description]
-        //$autogencaptions [scs_ytap_video-captions]
-        //$currvidtags [scs_ytap_video-tags]
-        //$curthumb [scs_ytap_video-thumbnail]
 
     }
 
     public function publishedAfter_callback()
-    {global $scs_publishedAfter;
+    {
         if (isset($this->options['publishedAfter'])) {
-            $scs_publishedAfter = $this->options['publishedAfter'];} else { $scs_publishedAfter = "";}
+            $this->scs_publishedAfter = $this->options['publishedAfter'];} else { $this->scs_publishedAfter = "";}
 
         printf(
             '<input type="date" id="publishedAfter" class="scsytapdate" name="scs_ytap_options[publishedAfter]" value="%s" /> <span title="If facing issues, use Published Before Date as well">(Optional)</span>',
@@ -451,9 +454,9 @@ class MySettingsPage
     }
 
     public function publishedBefore_callback()
-    {global $scs_publishedBefore;
+    {
         if (isset($this->options['publishedBefore'])) {
-            $scs_publishedBefore = $this->options['publishedBefore'];} else { $scs_publishedBefore = "";}
+            $this->scs_publishedBefore = $this->options['publishedBefore'];} else { $this->scs_publishedBefore = "";}
 
         printf(
             '<input type="date" id="publishedBefore" class="scsytapdate" name="scs_ytap_options[publishedBefore]" value="%s" /> <span title="If facing issues, use Published After Date as well">(Optional)</span>',
@@ -463,11 +466,11 @@ class MySettingsPage
     }
 
     public function cronDay_callback()
-    {global $scs_cronDay;
+    {
         if (isset($this->options['cronDay'])) {
-            $scs_cronDay = $this->options['cronDay'];} else { $scs_cronDay = "OFF";}
+            $this->scs_cronDay = $this->options['cronDay'];} else { $this->scs_cronDay = "OFF";}
 
-        $post_cronDay_code = post_cronDay_array_loop($scs_cronDay);
+        $post_cronDay_code = scs_ytap_post_cronDay_array_loop($this->scs_cronDay);
 
         printf(
             '<select id="cronDay" name="scs_ytap_options[cronDay]" value="%s">
@@ -477,8 +480,8 @@ class MySettingsPage
             isset($this->options['cronDay']) ? esc_attr($this->options['cronDay']) : 'OFF'
         );
 
-        if (isset($scs_cronDay)) {
-            if ($scs_cronDay != "OFF") {
+        if (isset($this->scs_cronDay)) {
+            if ($this->scs_cronDay != "OFF") {
                 //unschedule the cron first to set it with new value
                 if (wp_next_scheduled('scs_ytap_cron_event')) {
                     $timestamp = wp_next_scheduled('scs_ytap_cron_event');
@@ -487,7 +490,7 @@ class MySettingsPage
 
                 //check to see if cron is already scheduled
                 if (!wp_next_scheduled('scs_ytap_cron_event')) {
-                    wp_schedule_event(time(), $scs_cronDay, 'scs_ytap_cron_event');
+                    wp_schedule_event(time(), $this->scs_cronDay, 'scs_ytap_cron_event');
                 }
             } else {
                 //this will unschedule the cron
@@ -502,31 +505,13 @@ class MySettingsPage
 
     public function scs_ytap_main()
     {
-        global $scs_apikey;
-        global $scs_channelId;
-        global $scs_noofvids;
-        global $scs_post_status;
-        global $scs_ytap_shortcodes;
-        global $scs_publishedAfter;
-        global $scs_publishedBefore;
-        global $scs_post_category;
-        global $scs_post_author;
-        global $scs_post_date;
-        global $autogencaptionsswitch;
-        global $scs_ytap_output_result;
-
-        //echo "<h1>POSTS CREATED! ...</h1>";
 
         $scs_ytap_output_result = "";
         $allwpytids = scs_ytap_getYtIdsFromPosts();
 
-        $data = scs_ytap_getYtVideoListData($scs_apikey, $scs_channelId, $scs_noofvids, $scs_publishedAfter, $scs_publishedBefore);
-        //echo $data;
+        $data = scs_ytap_getYtVideoListData($this->scs_apikey, $this->scs_channelId, $this->scs_noofvids, $this->scs_publishedAfter, $this->scs_publishedBefore);
 
-        for ($j = 0; $j < $scs_noofvids; $j++) {
-            //            echo "<pre>";
-            // var_dump($data['items'][$j]);
-            // echo "</pre>";
+        for ($j = 0; $j < $this->scs_noofvids; $j++) {
 
             $currvidid = $data['items'][$j]['id']['videoId'];
             $currvidtitle = $data['items'][$j]['snippet']['title'];
@@ -537,7 +522,7 @@ class MySettingsPage
             if (!in_array($currvidid, $allwpytids)) {
                 $scs_ytap_output_result .= "<div class='scsposted'><b>Video $vidno:</b> $currvidtitle <i>[$currvidid]</i> posted!</div>";
 
-                $viddata = scs_ytap_getYtVideoIndividualData($scs_apikey, $currvidid);
+                $viddata = scs_ytap_getYtVideoIndividualData($this->scs_apikey, $currvidid);
 
                 //echo "ID: " . $currvidid . "<br>";
                 $currviddes = $viddata['items'][0]['snippet']['description'];
@@ -558,9 +543,9 @@ class MySettingsPage
                     // echo $currvidtags[$i] . ", ";
                 }
                 //then we get the autogenerated captions
-                if ($autogencaptionsswitch) {$autogencaptions = getClosedCaptionsForVideo($currvidid);} else { $autogencaptions = "";}
+                if ($this->autogencaptionsswitch) {$autogencaptions = scs_ytap_getClosedCaptionsForVideo($currvidid);} else { $autogencaptions = "";}
 
-                scs_ytap_createPost($currvidtitle, $scs_post_status, $currvidid, $currviddes, $autogencaptions, $currvidtags, $curthumb, $scs_ytap_shortcodes, $scs_post_category, $scs_post_author, $scs_post_date, $scs_yt_post_date);
+                scs_ytap_createPost($currvidtitle, $this->scs_post_status, $currvidid, $currviddes, $autogencaptions, $currvidtags, $curthumb, $this->scs_ytap_shortcodes, $this->scs_post_category, $this->scs_post_author, $this->scs_post_date, $scs_yt_post_date);
 
             } else { $scs_ytap_output_result .= "<div class='scsalreadyposted'><b>Video $vidno:</b> $currvidtitle <i>[$currvidid]</i> already posted!</div>";}
 
@@ -573,7 +558,7 @@ class MySettingsPage
 }
 
 //if (is_admin()) {
-$my_settings_page = new MySettingsPage();
+$my_settings_page = new scs_ytap_SettingsPage();
 //}
 
 //set a cron job
